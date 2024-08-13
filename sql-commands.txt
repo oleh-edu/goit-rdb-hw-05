@@ -1,0 +1,76 @@
+-- 1. SQL query to display the order_details table with the customer_id field from the orders table.
+
+SELECT 
+    order_details.*, 
+    (SELECT orders.customer_id 
+     FROM orders 
+     WHERE orders.id = order_details.order_id) AS customer_id
+FROM 
+    order_details;
+
+-- 2. SQL query to display the order_details table with the filter shipper_id=3 in the orders table.
+
+SELECT 
+    order_details.*
+FROM 
+    order_details
+WHERE 
+    order_details.order_id IN (
+        SELECT orders.id 
+        FROM orders 
+        WHERE orders.shipper_id = 3
+    );
+
+-- 3. SQL query with a nested subquery in the FROM clause to calculate the average value of the quantity field.
+
+SELECT 
+    subquery.order_id, 
+    AVG(subquery.quantity) AS avg_quantity
+FROM 
+    (SELECT order_id, quantity 
+     FROM order_details 
+     WHERE quantity > 10) AS subquery
+GROUP BY 
+    subquery.order_id;
+
+-- 4. Solving task 3 using the WITH statement.
+
+WITH temp AS (
+    SELECT 
+        order_id, 
+        quantity 
+    FROM 
+        order_details 
+    WHERE 
+        quantity > 10
+)
+SELECT 
+    temp.order_id, 
+    AVG(temp.quantity) AS avg_quantity
+FROM 
+    temp
+GROUP BY 
+    temp.order_id;
+
+-- 5. Creating a function with two parameters of type FLOAT.
+
+DROP FUNCTION IF EXISTS divide_float;
+
+DELIMITER $$
+
+CREATE FUNCTION divide_float(x FLOAT, y FLOAT) 
+RETURNS FLOAT
+DETERMINISTIC
+BEGIN
+    RETURN x / y;
+END$$
+
+DELIMITER ;
+
+-- Using a function for the quantity attribute from the order_details table.
+SELECT 
+    id, 
+    quantity, 
+    divide_float(quantity, 2.5) AS divided_quantity
+FROM 
+    order_details;
